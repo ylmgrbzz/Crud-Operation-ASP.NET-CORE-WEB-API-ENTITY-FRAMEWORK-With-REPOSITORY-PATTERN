@@ -29,6 +29,7 @@ namespace DotNetAPİDemo.Controllers
             })
             .ToArray();
         }
+
         [HttpPost(Name = "PostWeatherForecast")]
         public IActionResult Post(WeatherForecast weatherForecast)
         {

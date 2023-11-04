@@ -1,4 +1,5 @@
 ﻿using DotNetAPİDemo.Context;
+using DotNetAPİDemo.Interfaces.Manager;
 using DotNetAPİDemo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -10,12 +11,10 @@ namespace DotNetAPİDemo.Controllers
     public class PostController : ControllerBase
     {
         //private ApplicationDbContext _dbContext;
-        private IPostManager _postManager
+        private IPostManager _postManager;
 
-
-        public PostController(ApplicationDbContext dbContext)
+        public PostController(IPostManager postManager)
         {
-            //_dbContext = dbContext;
             _postManager = postManager;
         }
 
@@ -24,7 +23,7 @@ namespace DotNetAPİDemo.Controllers
         {
             try
             {
-                var posts = _postManager.GetAll().OrderBy(c => c.CreatedAt).thenBy(c => c.Title).ToList();
+                var posts = _postManager.GetAll().OrderBy(c => c.CreatedAt).ThenBy(c => c.Title).ToList();
                 return CustomResult("data loaded succes", posts);
             }
             catch (Exception ex)
@@ -66,7 +65,7 @@ namespace DotNetAPİDemo.Controllers
         {
             try
             {
-                var posts = _postManager.getPosts(page, 10);
+                var posts = _postManager.GetPosts(page, 10);
                 return CustomResult("Paging data for page no " + page, posts.ToList());
             }
             catch (Exception ex)
@@ -80,7 +79,7 @@ namespace DotNetAPİDemo.Controllers
         {
             try
             {
-                var posts = _postManager.GetAll().OrderByDescending(c => c.CreatedDate).ThenByDescending(c => c.Title).ToList();
+                var posts = _postManager.GetAll().OrderByDescending(c => c.CreatedAt).ThenByDescending(c => c.Title).ToList();
                 return CustomResult("Data loaded successfully.", posts);
             }
             catch (Exception ex)

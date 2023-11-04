@@ -23,7 +23,6 @@ namespace DotNetAPİDemo.Manager
             return Get(c => c.Title.ToLower() == title.ToLower());
         }
 
-
         public ICollection<Post> SearchPost(string text)
         {
             return Get(x => x.Title.ToLower().Contains(text.ToLower()) || x.Description.ToLower().Contains(text.ToLower()));
