@@ -1,6 +1,6 @@
 ﻿using DotNetAPİDemo.Context;
-using DotNetAPİDemo.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace DotNetAPİDemo.Controllers
 {
@@ -8,58 +8,102 @@ namespace DotNetAPİDemo.Controllers
     [ApiController]
     public class PostController : ControllerBase
     {
-        private ApplicationDbContext _dbContext;
+        //private ApplicationDbContext _dbContext;
+        private IPostManager _postManager
+
 
         public PostController(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            //_dbContext = dbContext;
+            _postManager = postManager;
         }
 
-        [HttpPost]
-        public IActionResult Add(Post post)
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            post.CreatedAt = System.DateTime.Now;
-            _dbContext.Posts.Add(post);
-            bool isSaved = _dbContext.SaveChanges() > 0;
-            if (isSaved)
+            try
             {
-                return Ok(post);
+                var posts = _postManager.GetAll().OrderBy(c => c.CreatedAt).thenBy(c => c.Title).ToList();
+                return CustomResult("data loaded succes", posts);
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest("Post not saved");
+                return CustomResult(ex.Message, HttpStatusCode.BadRequest);
+            }
+        }
+
+        [HttpGet("title")]
+        public IActionResult GetAll(string title)
+        {
+            try
+            {
+                var post = _postManager.GetAll(title);
+                return CustomResult("data loaded succes", post.ToList());
+            }
+            catch (Exception ex)
+            {
+                return CustomResult(ex.Message, HttpStatusCode.BadRequest);
+            }
+        }
+
+        [HttpGet("text")]
+        public IActionResult SearchPost(string text)
+        {
+            try
+            {
+                var posts = _postManager.SearchPost(text);
+                return CustomResult("Searching result", posts);
+            }
+            catch (Exception exception)
+            {
+                return CustomResult(exception.Message, HttpStatusCode.BadRequest);
             }
         }
 
         [HttpGet]
-        public List<Post> GetAll()
+        public IActionResult getPosts(int page = 1)
         {
-            var posts = _dbContext.Posts.ToList();
-            return posts;
+            try
+            {
+                var posts = _postManager.getPosts(page, 10);
+                return CustomResult("Paging data for page no " + page, posts.ToList());
+            }
+            catch (Exception ex)
+            {
+                return CustomResult(ex.Message, HttpStatusCode.BadRequest);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetAllDesc()
+        {
+            try
+            {
+                var posts = _postManager.GetAll().OrderByDescending(c => c.CreatedDate).ThenByDescending(c => c.Title).ToList();
+                return CustomResult("Data loaded successfully.", posts);
+            }
+            catch (Exception ex)
+            {
+                return CustomResult(ex.Message, HttpStatusCode.BadRequest);
+            }
         }
 
         [HttpGet("{id}")]
-        public Post GetById(int id)
+        public IActionResult GetById(int id)
         {
-            var post = _dbContext.Posts.Find(id);
-            return post;
-        }
-
-        [HttpPut]
-        public IActionResult UpdatePost(Post post)
-        {
-            _dbContext.Posts.Update(post);
-            _dbContext.SaveChanges();
-            return Ok(post);
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult DeletePost(int id)
-        {
-            var post = _dbContext.Posts.Find(id);
-            _dbContext.Posts.Remove(post);
-            _dbContext.SaveChanges();
-            return Ok();
+            try
+            {
+                var post = _postManager.GetById(id);
+                if (post == null)
+                {
+                    return CustomResult("Data not found.", HttpStatusCode.NotFound);
+                }
+                return CustomResult("Data loaded successfully.", post);
+            }
+            catch (Exception ex)
+            {
+                return CustomResult(ex.Message, HttpStatusCode.BadRequest);
+            }
         }
     }
 }
